@@ -1,0 +1,104 @@
+body {
+    display: flex;
+    /* flex-flow: column wrap; */
+    justify-content: center;
+    align-items: center;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    height: 100vh;
+    /* box-sizing: border-box; */
+}
+/* .tittle {
+    margin-top: 15px;
+    margin-bottom: 11px;
+    font-size: 38px;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+} */
+.container {
+    width: 340px;
+    height: 650px;
+    background-color: black;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.container__pantalla {
+    width: 85%;
+    height: 30%;
+    background-color: rgb(246, 255, 255);
+    margin-bottom: 8px;
+    border-radius: 15px;
+    position: relative;
+    box-sizing: border-box;
+    overflow: hidden;
+    display: flex;
+    /* align-items: flex-end;
+    justify-content: flex-end; */
+    /* word-wrap: break-word; */
+    /* text-overflow: ellipsis; */
+}
+.container__pantalla .container__textoPantalla {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    font-size: 37px;
+    text-align: right;
+    max-height: 100%;
+    /* overflow-y: auto; */
+}
+
+.container__botones {
+    width: 95%;
+    height: 60%;
+    /* background-color: rgb(255, 158, 158); */
+    margin-top: 8px;
+    border-radius: 15px;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+    align-items: center;
+    row-gap: 5px;
+    column-gap: 5px;
+}
+
+.container__botones .container__boton {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background-color: #333333;
+    color: rgb(234, 234, 234);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;    
+    border: none;
+    cursor: pointer;
+}
+.container__botones .container__boton:hover {
+    background-color: #2d2d2d;
+    transition: all 0.2;
+}
+
+.container__botones .boton--gris {
+    background-color: #A6A6A6;
+    color: #000000;
+    font-weight: bolder;
+}  
+.container__botones .boton--gris:hover {
+    background-color: #929292;
+}
+
+
+.container__botones .boton--amarillo {
+    background-color: #FF9F0A;
+    font-size: 23px;
+}
+.container__botones .boton--amarillo:hover {
+    background-color: #ee930a;
+}
+.container__botones .boton--cero {
+    width: 44.6%;
+    border-radius: 25px;
+}
