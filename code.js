@@ -1,10 +1,17 @@
 const botones = document.querySelectorAll('.container__boton'); //seleccionamos todos los botones
+const textoPantalla = document.querySelector('.container__textoPantalla') //etiqueta p de texto en la pantalla
+
 let numerosOperables = [];  //array 2d vacio, que va a contener todos los numeros a operar, junto con su identificador de operacion
 let filaDeNumeros = []; //array individual que tiene los numeros a operar, que se almacena en el array 2d
-const operaciones = ['+', '-', '%', '÷', 'x'];
-
+let operadores = ['x', '+', '-', '%', '÷'];
 //funcion que se ejecuta cuando apretamos un boton
 const identificarNumeros = (event) => {
+    //agregamos el texto
+    if (operadores.includes(event.target.textContent)) {
+        textoPantalla.textContent += ` ${event.target.textContent} `;
+    } else {
+        textoPantalla.textContent += event.target.textContent;
+    }
 
     //verificamos que el contenido del event sea un numero, en caso de no serlo no se hace push a la fila de numeros
     if (!isNaN(parseInt(event.target.textContent))) {
@@ -16,10 +23,12 @@ const identificarNumeros = (event) => {
         //verificamos que boton de operacion apretamos, segun eso hacemos una accion u otra
         switch (event.target.textContent) {
             case 'C':
-
+                
                 break;
             case 'AC':
-
+                filaDeNumeros.length = 0;
+                numerosOperables.length = 0;
+                textoPantalla.textContent = '';
                 break;
             case '%':
                 filaDeNumeros.unshift('%');
@@ -51,11 +60,7 @@ const identificarNumeros = (event) => {
             case '=':
                 filaDeNumeros.unshift('=');
                 numerosOperables.push(filaDeNumeros.slice())
-                // console.log(filaDeNumeros);
                 filaDeNumeros.length = 0;
-                
-                console.log(numerosOperables);
-                // console.log(checkOp(numerosOperables, '+'));
                 
                 //Se itera solo cuando exista las siguientes operaciones pendientes.
                 while (numerosOperables.length > 1) {
