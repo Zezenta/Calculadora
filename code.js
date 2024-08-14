@@ -4,6 +4,7 @@ const textoPantalla = document.querySelector('.container__textoPantalla') //etiq
 let numerosOperables = [];  //array 2d vacio, que va a contener todos los numeros a operar, junto con su identificador de operacion
 let filaDeNumeros = []; //array individual que tiene los numeros a operar, que se almacena en el array 2d
 let operadores = ['x', '+', '-', '%', '÷'];
+let operado = false;
 
 //funcion que se ejecuta cuando apretamos un boton
 const identificarNumeros = (event) => {
@@ -21,6 +22,8 @@ const identificarNumeros = (event) => {
     
     //Ejecutamos solo cuando tenemos al menos un numero en el array
     if (filaDeNumeros.length > 0) {
+        // console.log(event.target.textContent);
+        
         //verificamos que boton de operacion apretamos, segun eso hacemos una accion u otra
         switch (event.target.textContent) {
             case 'C':
@@ -45,6 +48,7 @@ const identificarNumeros = (event) => {
                 filaDeNumeros.unshift('x');
                 numerosOperables.push(filaDeNumeros.slice())
                 filaDeNumeros.length = 0;
+                console.log(numerosOperables);
                 break;
             case '-':
                 filaDeNumeros.unshift('-');
@@ -100,7 +104,17 @@ const identificarNumeros = (event) => {
                         }
                     }
                 }
-                console.log(`resultado: ${numerosOperables}`);
+                // console.log(numerosOperables);
+                numerosOperables[0].shift();
+                for(let element of numerosOperables[0]){
+                    filaDeNumeros.push(element);
+                }
+                
+                let resultado = Number(numerosOperables[0].join(''));
+                textoPantalla.textContent = resultado;
+                numerosOperables.length = 0;
+                operado = true;
+                
             break;
         }
     }
@@ -152,18 +166,18 @@ function sacarPorcentaje(op1, op2) {
     
 }
 
-
-
-
-
-
-
-
-
-
-
-
+//funcion que se ejecuta cada vez que le damos click a un boton
 botones.forEach(boton => {
-    boton.addEventListener('click', identificarNumeros) //funcion que se ejecuta cada vez que le damos click a un boton
+    boton.addEventListener('click', identificarNumeros)
 })
 
+
+
+// Cosas que faltan
+// Arreglar como se distribuye el texto en la pantalla
+// Aprender a como sacar porcentajes
+// Borrar cantidades u operadores uno por uno
+// Implementar las comas para poder escribir numeros decimales
+
+// OPCIONAL
+// Implementacion de visualizacion en vertical, con mas funcions 

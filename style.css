@@ -17,10 +17,10 @@ body {
     align-items: center;
 }
 
+/* Pantalla */
 .container__pantalla {
     width: 85%;
     height: 30%;
-    /* background-color: rgb(246, 255, 255); */
     margin-bottom: 8px;
     border-radius: 15px;
     position: relative;
@@ -29,6 +29,7 @@ body {
     display: flex;
 
 }
+/* Texto de la pantalla */
 .container__pantalla .container__textoPantalla {
     position: absolute;
     bottom: 10px;
@@ -39,6 +40,7 @@ body {
     color: white;
 }
 
+/* Contenedor que almacena los botones */
 .container__botones {
     width: 95%;
     height: 60%;
@@ -51,7 +53,7 @@ body {
     row-gap: 5px;
     column-gap: 5px;
 }
-
+/* Los botones individuales */
 .container__botones .container__boton {
     width: 70px;
     height: 70px;
@@ -87,7 +89,8 @@ body {
 .container__botones .boton--amarillo:hover {
     background-color: #ee930a;
 }
+/* Boton cero (bigger) */
 .container__botones .boton--cero {
-    width: 44.6%;
+    width: 44.7%;
     border-radius: 25px;
 }
