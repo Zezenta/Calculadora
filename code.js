@@ -3,20 +3,23 @@ const textoPantalla = document.querySelector('.container__textoPantalla') //etiq
 
 let numerosOperables = [];  //array 2d vacio, que va a contener todos los numeros a operar, junto con su identificador de operacion
 let filaDeNumeros = []; //array individual que tiene los numeros a operar, que se almacena en el array 2d
-let operadores = ['x', '+', '-', '%', '÷', 'AC', 'C'];
+let sacandoPorcentaje= []; //En caso de tener porcentajes, guardamos la transformacion de 9% a 0.09 aqui y manipulamos
+let operadores = ['x', '+', '-', '÷', 'AC', 'C'];
+let percentaje = false;
 
 //funcion que se ejecuta cuando apretamos un boton
 const identificarNumeros = (event) => {
-
-    //verificamos que el contenido del event sea un numero, en caso de no serlo no se hace push a la fila de numeros
-    if (!isNaN(parseInt(event.target.textContent))) {
-        filaDeNumeros.push(event.target.textContent);
-        textoPantalla.textContent += event.target.textContent;
-    }
-
     //Evaluamos condiciones para los botones de borrar y como se agrega el texto
     switch (true) {
-        //Borramos la info de todos los arrays, y lo que aparece en el texto
+        //verificamos que el contenido del event sea un numero, en caso de no serlo no se hace push a la fila de numeros
+        case !operadores.includes(event.target.textContent):
+            if (!isNaN(Number(event.target.textContent))) {
+                filaDeNumeros.push(event.target.textContent);
+            }
+            textoPantalla.textContent += event.target.textContent;
+            break;
+
+            //Borramos la info de todos los arrays, y lo que aparece en el texto
         case event.target.textContent === 'AC':
             filaDeNumeros.length = 0;
             numerosOperables.length = 0;
@@ -28,20 +31,17 @@ const identificarNumeros = (event) => {
             //Condicion para borrar la fila que escribimos antes de designarle un operador
             if (filaDeNumeros.length > 0) {
                 filaDeNumeros.pop();
-            
+
             } else if(filaDeNumeros.length === 0 && numerosOperables.length > 0){   //Siguiente array, es el operador
                 numerosOperables[numerosOperables.length - 1].shift();  //eliminamos el operador del ultimo array de nuestro array 2d
 
                 for(let element of numerosOperables[numerosOperables.length - 1]){
                     filaDeNumeros.push(element);    //Todos los numeros del ultimo array, se van de nuevo a la fila de numeros (Restart)
                 }
-
                 numerosOperables.pop();//Eliminamos el ultimo elemento de nuestro array 2d, nunca existio
-
                 //Borramos en pantalla el operador anterior, junto con sus espacios que le habiamos dejado
                 textoPantalla.textContent = textoPantalla.textContent.slice(0, -2);
             }
-
             //Eliminamos el ultimo elemento de lo que tenemos en nuestra etiqueta p
             textoPantalla.textContent = textoPantalla.textContent.slice(0, -1); 
             break;
@@ -53,40 +53,76 @@ const identificarNumeros = (event) => {
     }
     
     //Ejecutamos solo cuando tenemos al menos un numero por operar
-    if (filaDeNumeros.length > 0) {
+    if (!isNaN(Number(event.target.textContent)) || filaDeNumeros.length > 0 || percentaje) {
         //verificamos que boton de operacion apretamos, segun eso hacemos una accion u otra
         switch (event.target.textContent) {
             case '%':
-                filaDeNumeros.unshift('%');
-                numerosOperables.push(filaDeNumeros.slice())
+
+                sacandoPorcentaje = sacarPorcentaje(filaDeNumeros);
+                console.log('convertido: ', sacandoPorcentaje);
+                
+                numerosOperables.push(sacandoPorcentaje.slice());
+                percentaje = true;
                 filaDeNumeros.length = 0;
+
+                console.log(numerosOperables);
                 break;
             case '÷':
-                filaDeNumeros.unshift('÷');
-                numerosOperables.push(filaDeNumeros.slice())
-                filaDeNumeros.length = 0;
+                if(percentaje) {
+                    operarPorcentaje('÷');
+                } else {
+                    filaDeNumeros.unshift('÷');
+                    numerosOperables.push(filaDeNumeros.slice())
+                    filaDeNumeros.length = 0;
+                }
+                
                 break;
             case 'x':
-                filaDeNumeros.unshift('x');
-                numerosOperables.push(filaDeNumeros.slice())
-                filaDeNumeros.length = 0;
+                if(percentaje) {
+                    operarPorcentaje('x');
+                } else {
+                    filaDeNumeros.unshift('x');
+                    numerosOperables.push(filaDeNumeros.slice())
+                    console.log('numeros operables: ', numerosOperables);
+                    filaDeNumeros.length = 0;
+                }
+                
                 break;
             case '-':
-                filaDeNumeros.unshift('-');
-                numerosOperables.push(filaDeNumeros.slice())
-                filaDeNumeros.length = 0;
+                if(percentaje) {
+                    operarPorcentaje('-');
+                } else {
+                    filaDeNumeros.unshift('-');
+                    numerosOperables.push(filaDeNumeros.slice())
+                    filaDeNumeros.length = 0;
+                }
+
                 break;
             case '+':
-                filaDeNumeros.unshift('+');
-                numerosOperables.push(filaDeNumeros.slice())
-                filaDeNumeros.length = 0;
+                if(percentaje) {
+                    operarPorcentaje('+');
+                } else {
+                    filaDeNumeros.unshift('+');
+                    numerosOperables.push(filaDeNumeros.slice())
+                    filaDeNumeros.length = 0;
+                }
+
                 break;
             case ',':
                 break;
             case '=':
-                filaDeNumeros.unshift('='); //Para identificar que esa es la ultima fila a operar
-                numerosOperables.push(filaDeNumeros.slice())
-                filaDeNumeros.length = 0;
+                console.log('igual');
+                if (percentaje) {
+                    numerosOperables[numerosOperables.length - 1].unshift('=');
+                    percentaje = false;
+                    console.log(numerosOperables);
+
+                } else {
+                    filaDeNumeros.unshift('='); //Para identificar que esa es la ultima fila a operar
+                    numerosOperables.push(filaDeNumeros.slice())
+                    console.log(numerosOperables);
+                    filaDeNumeros.length = 0;
+                }
                 
                 //Se itera solo cuando exista las siguientes operaciones pendientes.    (logica de jerarquia de numeros)
                 while (numerosOperables.length > 1) {
@@ -98,6 +134,8 @@ const identificarNumeros = (event) => {
                                 //guardamos la operacion que va a seguir en el array resultado
                                 let aux = numerosOperables[i+1][0];
                                 let multiplicando = multiplicar(numerosOperables[i], numerosOperables[i+1]);    //resultado de la op
+                                // console.log(multiplicando);
+                                
                                 //funcion que convierte mi numero, a array y lo coloca el array 2d, remplazando los dos anteriores
                                 fromNumberToArray(i, multiplicando, aux);
                                 
@@ -125,6 +163,7 @@ const identificarNumeros = (event) => {
                         }
                     }
                 }
+                // percentaje = false;
 
                 numerosOperables[0].shift();    //Eliminamos el operador '='
 
@@ -135,10 +174,17 @@ const identificarNumeros = (event) => {
                 //Convertimos nuestro array a numero, y lo mostramos
                 let resultado = Number(numerosOperables[0].join('')); 
                 textoPantalla.textContent = resultado;
-                numerosOperables.length = 0;    //Vaciamos el contendio del array 2d.
+                // numerosOperables.length = 0;    //Vaciamos el contendio del array 2d.
             break;
         }
     }
+}
+
+function operarPorcentaje(operador) {
+    numerosOperables[numerosOperables.length - 1].unshift(operador);
+    percentaje = false;
+    sacandoPorcentaje.length = 0;
+    console.log(numerosOperables);
 }
 
 //funcion que verifica que operaciones tenemos en el array 2d
@@ -154,6 +200,11 @@ function fromArrayToNumber(op1, op2) {
     //unimos el array de strings sin espacios, y lo convertimos con la funcion Number, que funciona para ints y floats.
     op1 = Number(op1.join(''));
     op2 = Number(op2.join(''));
+
+    // console.log('hecho numero: ', op1);
+    // console.log('hecho numero: ', op2);
+    
+    
     
     return {op1, op2};
 }
@@ -176,15 +227,26 @@ function restar(op1, op2) {
     return numbers.op1 - numbers.op2;
 }
 function multiplicar(op1, op2) {
+    // console.log(op1);
+    // console.log(op2);
+    
+    
     let numbers = fromArrayToNumber(op1, op2);
+    // console.log(numbers.op1 * numbers.op2);
+    
     return numbers.op1 * numbers.op2;
 }
 function dividir(op1, op2) {
     let numbers = fromArrayToNumber(op1, op2);
     return numbers.op1 / numbers.op2;
 }
-function sacarPorcentaje(op1, op2) {
-    
+function sacarPorcentaje(num) {
+    // num.shift();
+    let numero = Number(num.join(''));
+    numero /= 100;
+    numero = numero.toString().split('');
+    // console.log(numero);
+    return numero;
 }
 
 //funcion que se ejecuta cada vez que le damos click a un boton
@@ -200,6 +262,7 @@ botones.forEach(boton => {
 // Implementar las comas para poder escribir numeros decimales
 // Si pongo un numero varios operadores iguales, se hace la esa igual
 // si pongo un numero y diferentes operadores, se toma como valido el primero 
+// Hay un problemota cuando borras un porcentaje
 
 // OPCIONAL:
 // Implementar poder colocar los numeros con los botones del teclado
