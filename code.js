@@ -6,125 +6,90 @@ let filaDeNumeros = []; //array individual que tiene los numeros a operar, que s
 let sacandoPorcentaje= []; //En caso de tener porcentajes, guardamos la transformacion de 9% a 0.09 aqui y manipulamos
 let operadores = ['x', '+', '-', '÷', 'AC', 'C', '='];
 let percentaje = false;     //Para determinar si actualmente se esta manipulando un numero con porcentaje
-let operado = false;    //Para determinar si recien se opero un numero, entonces no se permite modificarlo
+let operandoSigno = false;  //Para identificar si en el momento tenemos en pantalla un signo de operacion
+let solved = false;    //Para determinar si recien se opero un numero, entonces no se permite modificarlo
 
 //funcion que se ejecuta cuando apretamos un boton
 const identificarNumeros = (event) => {
-    //Evaluamos condiciones para los botones de borrar y como se agrega el texto
-    switch (true) {
-        //verificamos que el contenido del event sea un numero, en caso de no serlo no se hace push a la fila de numeros
-        case !operadores.includes(event.target.textContent) && !percentaje && !operado:
-            if (!isNaN(Number(event.target.textContent)) || event.target.textContent === '.') {
-                filaDeNumeros.push(event.target.textContent);
-                console.log(filaDeNumeros);
+    let evento = event.target.textContent;  //numero o boton que presionamos, en formato str por default
+    
+    if (!operadores.includes(evento) && !percentaje && !solved) {
+        //Hacemos push todo lo que no sea un signo, sin tomar en cuenta el % y el . , no repetimos le punto 
+        if (evento !== '%') {
+            filaDeNumeros.push(evento);
+            //en caso de haber puntos repetidos, se eliminan del array y de la pantalla 
+            evento === '.' && operandoSigno ? (filaDeNumeros.pop(), textoPantalla.textContent = textoPantalla.textContent.slice(0, -1)) : null;
+            operandoSigno = false;
+        }
+        textoPantalla.textContent += evento;
+        evento === '.' ? operandoSigno = true : null;
+
+    } else if(evento === 'AC') {
+        //Reiniciamos todo en caso de borrar completo
+        filaDeNumeros.length = 0;
+        numerosOperables.length = 0;
+        textoPantalla.textContent = '';
+        solved = false;
+        percentaje = false;
+        operandoSigno = false;
+
+    } else if(evento === 'C' && !solved) {
+        //Condicion para borrar la fila que escribimos antes de designarle un operador
+        if (filaDeNumeros.length > 0) {
+            filaDeNumeros.pop();
+            textoPantalla.textContent = textoPantalla.textContent.slice(0, -1);     //eliminamos el ultimo elemento
+
+        } else if(filaDeNumeros.length === 0 && numerosOperables.length > 0){   //Siguiente elemento, es el operador
+            if(textoPantalla.textContent.charAt(textoPantalla.textContent.length - 1) === '%') {    //determinamos si el siguiente operador es %
+                textoPantalla.textContent = textoPantalla.textContent.slice(0, -1); //borramos un espacio
+                let numeroDePorcentaje = Number(numerosOperables[numerosOperables.length - 1].join('')); //guardamos el valor del porcentaje
+                numeroDePorcentaje *= 100;  //lo convertimos a su numero original, ejem: 0.09 = 9
+                filaDeNumeros.push(numeroDePorcentaje);                                                    
+                numerosOperables[numerosOperables.length - 1] = filaDeNumeros;
                 
+            } else {    //Es cualquier operador, menos el de %
+                numerosOperables[numerosOperables.length - 1].shift();  //eliminamos el operador del ultimo array de nuestro array 2d
+                filaDeNumeros = numerosOperables[numerosOperables.length - 1].slice();  //Reiniciamos
+                numerosOperables.pop();//Eliminamos el ultimo elemento de nuestro array 2d, nunca existio
+                //Borramos en pantalla el operador anterior, junto con sus espacios que le habiamos dejado
+                textoPantalla.textContent = textoPantalla.textContent.slice(0, -3);
             }
-            textoPantalla.textContent += event.target.textContent;
-            break;
-
-        //Borramos la info de todos los arrays, y lo que aparece en el texto
-        case event.target.textContent === 'AC':
-            filaDeNumeros.length = 0;
-            numerosOperables.length = 0;
-            textoPantalla.textContent = '';
-            operado = false;
-            percentaje = false;
-            break;
-        
-        //Borramos uno por uno
-        case event.target.textContent === 'C' && !operado:
-            //Condicion para borrar la fila que escribimos antes de designarle un operador
-            if (filaDeNumeros.length > 0) {
-                filaDeNumeros.pop();
-                textoPantalla.textContent = textoPantalla.textContent.slice(0, -1);     //eliminamos el ultimo elemento
-
-            } else if(filaDeNumeros.length === 0 && numerosOperables.length > 0){   //Siguiente elemento, es el operador
-
-                if(textoPantalla.textContent.charAt(textoPantalla.textContent.length - 1) === '%') {    //determinamos si el siguiente operador es %
-                    
-                    textoPantalla.textContent = textoPantalla.textContent.slice(0, -1); //borramos un espacio
-                    let numeroDePorcentaje = Number(numerosOperables[numerosOperables.length - 1].join('')); //guardamos el valor del porcentaje
-                    numeroDePorcentaje *= 100;  //lo convertimos a su numero original, ejem: 0.09 = 9
-                    filaDeNumeros.push(numeroDePorcentaje);                                                    
-                    numerosOperables[numerosOperables.length - 1] = filaDeNumeros;
-                    
-                } else {    //es cualquier operador, menos el de %
-
-                    numerosOperables[numerosOperables.length - 1].shift();  //eliminamos el operador del ultimo array de nuestro array 2d
-                    filaDeNumeros = numerosOperables[numerosOperables.length - 1].slice();  //Reiniciamos
-                    numerosOperables.pop();//Eliminamos el ultimo elemento de nuestro array 2d, nunca existio
-
-                    //Borramos en pantalla el operador anterior, junto con sus espacios que le habiamos dejado
-                    textoPantalla.textContent = textoPantalla.textContent.slice(0, -3);
-
-                }
-
-            }
-            break;
-        
-        //En caso de ser un operador, dar espacios al momento de escribir
-        case operadores.includes(event.target.textContent):
-            textoPantalla.textContent += ` ${event.target.textContent} `;
-            break;
+        }
     }
     
     //Ejecutamos cuando queremos operar y no poner un numero
-    if ( isNaN(Number(event.target.textContent)) && (filaDeNumeros.length > 0 || percentaje)) {
-
-        operado = false;    //Operado deja de ser falso, porque se prosiguio a usar un operador cualquiera
+    if ( (isNaN(Number(evento)) && evento !== 'C' && !operandoSigno) && (filaDeNumeros.length > 0 || percentaje || evento === '%')) {
+        
+        solved = false; 
+        operandoSigno = true;
+        operadores.includes(evento) ? textoPantalla.textContent += ` ${evento} ` : null;    //Para escribir los operadores con espacios
 
         //verificamos que boton de operacion apretamos, segun eso hacemos una accion u otra
-        switch (event.target.textContent) {
+        switch (evento) {
             case '%': 
                 sacandoPorcentaje = sacarPorcentaje(filaDeNumeros);
                 numerosOperables.push(sacandoPorcentaje.slice());
                 percentaje = true;
                 filaDeNumeros.length = 0;
+                operandoSigno = false;
                 break;
 
-            case '÷':   
-                if(percentaje) {
-                    operarPorcentaje('÷');
-                } else {
-                    filaDeNumeros.unshift('÷');
-                    numerosOperables.push(filaDeNumeros.slice())
-                    filaDeNumeros.length = 0;
-                }
+            case '÷':
+                operar(evento);
                 break;
 
             case 'x': 
-                if(percentaje) {
-                    operarPorcentaje('x');
-                } else {
-                    filaDeNumeros.unshift('x');
-                    numerosOperables.push(filaDeNumeros.slice())
-                    filaDeNumeros.length = 0;
-                }
+                operar(evento)
                 break;
 
             case '-':
-                if(percentaje) {
-                    operarPorcentaje('-');
-                } else {
-                    filaDeNumeros.unshift('-');
-                    numerosOperables.push(filaDeNumeros.slice())
-                    filaDeNumeros.length = 0;
-                }
+                operar(evento)
                 break;
 
             case '+':
-                if(percentaje) {
-                    operarPorcentaje('+');
-                } else {
-                    filaDeNumeros.unshift('+');
-                    numerosOperables.push(filaDeNumeros.slice())
-                    filaDeNumeros.length = 0;
-                }
+                operar(evento)
                 break;
 
-            case ',':
-
-                break;
             case '=':   //Se ejecuta ya cuando operamos
 
                 if (percentaje) {   //En caso que el ultimo numero sea un porcentaje
@@ -184,18 +149,24 @@ const identificarNumeros = (event) => {
                 let resultado = Number(numerosOperables[0].join('')); 
                 textoPantalla.textContent = resultado;
                 numerosOperables.length = 0;    //Vaciamos el contendio del array 2d.
-                operado = true;     //Decimos que el numero actual es el que recien se acaba de operar
+                solved = true;     //Decimos que el numero actual es el que recien se acaba de operar
+                operandoSigno = false;
             break;
         }
     }
 }
 
 // Funcion para operar un numero al que se le designo porcentaje, por ejemplo 0.09 + otro numero
-function operarPorcentaje(operador) {
-    numerosOperables[numerosOperables.length - 1].unshift(operador);
-    percentaje = false;
-    sacandoPorcentaje.length = 0;
-    console.log(numerosOperables);
+function operar(operador) {
+    if(percentaje) {
+        numerosOperables[numerosOperables.length - 1].unshift(operador);
+        percentaje = false;
+        sacandoPorcentaje.length = 0;
+    } else {
+        filaDeNumeros.unshift(operador);
+        numerosOperables.push(filaDeNumeros.slice())
+        filaDeNumeros.length = 0;
+    }
 }
 
 //funcion que verifica que operaciones tenemos en el array 2d
@@ -226,21 +197,26 @@ function fromNumberToArray(index, number, aux) {
 //funciones de operaciones
 function sumar(op1, op2) {
     let numbers = fromArrayToNumber(op1, op2);
-    return numbers.op1 + numbers.op2;
+    let result = numbers.op1 + numbers.op2;
+    return parseFloat(result.toFixed(3));
 }
 function restar(op1, op2) {
     let numbers = fromArrayToNumber(op1, op2);
-    return numbers.op1 - numbers.op2;
+    let result = numbers.op1 - numbers.op2;
+    return parseFloat(result.toFixed(3));
 }
 function multiplicar(op1, op2) {
     let numbers = fromArrayToNumber(op1, op2);
-    return numbers.op1 * numbers.op2;
+    let result = numbers.op1 * numbers.op2;
+    return parseFloat(result.toFixed(3));
 }
 function dividir(op1, op2) {
     let numbers = fromArrayToNumber(op1, op2);
-    return numbers.op1 / numbers.op2;
+    let result = numbers.op1 / numbers.op2;
+    return parseFloat(result.toFixed(3));
 }
 function sacarPorcentaje(num) {
+    //el numero independiente lo convertimos a su valor calculable, ejem: 9% = 0.09
     let numero = Number(num.join(''));
     numero /= 100;
     numero = numero.toString().split('');
@@ -252,18 +228,9 @@ botones.forEach(boton => {
     boton.addEventListener('click', identificarNumeros)
 })
 
-
-
 // Cosas que faltan:
 // Arreglar como se distribuye el texto en la pantalla
-// Aprender a como sacar porcentajes
-// Implementar las comas para poder escribir numeros decimales
-// Si pongo un numero varios operadores iguales, se hace la esa igual
-// si pongo un numero y diferentes operadores, se toma como valido el primero 
-// Quiero hacer que cuando salga el resultado de un numero, este no se pueda modificar con el teclado 
-// Tengo que hacer las operaciones con porcentajes bien
-// Cuando coloco la coma, sale como que estoy operando, y no como numero
 
 // OPCIONAL:
-// Implementar poder colocar los numeros con los botones del teclado
 // Si es que se puede, buscarle lugar a usar parentesis, eso desenglosaria un poco de problemas mas grandes
+//Implementar la opcion de teclado
